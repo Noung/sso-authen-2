@@ -8,9 +8,9 @@
 require_once __DIR__ . '/../config.php';
 
 return [
-    'clientID'     => '0oau9zv751eCqnz3z697',
-    'clientSecret' => 'iA5ur13Ol8BSNrRbx554YyLWkZL3bao6t_cxBKMCCfWfNVhUSxgBbiujbM2cGHw0',
-    'providerURL'  => 'https://integrator-9662685.okta.com', // providerURL คือ "Okta Domain" ที่ Okta สร้างให้ตอนสมัครสมาชิก
+    'clientID'     => 'YOUR_CLIENT_ID_HERE',
+    'clientSecret' => 'YOUR_CLIENT_SECRET_HERE',
+    'providerURL'  => 'YOUR_PROVIDER_URL_HERE',
 
     // **สำคัญ:** path ต้องมี /public/ เพิ่มเข้ามาให้ตรงกับโครงสร้างใหม่
     'redirectUri'  => $absoluteRedirectUri . '/public/callback.php',
