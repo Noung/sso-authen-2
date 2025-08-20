@@ -83,17 +83,85 @@ class SsoHandler {
         // 3. แปลงข้อมูลดิบให้เป็นรูปแบบมาตรฐานของเรา
         $normalizedUser = $this->normalizeClaims($ssoUserInfo);
 
-        // 4. เรียกใช้ฟังก์ชัน User Handler (user_handler.php) จากแอปพลิเคชัน
-        if (!function_exists('findOrCreateUser')) {
-            throw new Exception('Application must implement findOrCreateUser() function.');
+        // // 4. เรียกใช้ฟังก์ชัน User Handler (user_handler.php) จากแอปพลิเคชัน
+        // if (!function_exists('findOrCreateUser')) {
+        //     throw new Exception('Application must implement findOrCreateUser() function.');
+        // }
+        // $internalUser = findOrCreateUser($normalizedUser, $ssoUserInfo);
+
+        // -- v.2 --
+        // ตรวจสอบว่ามีการตั้งค่า USER_HANDLER_ENDPOINT หรือไม่
+        if (defined('USER_HANDLER_ENDPOINT') && !is_null(USER_HANDLER_ENDPOINT)) {
+            // --- แบบใหม่: เรียกใช้ API Endpoint ---
+            $internalUser = $this->callUserHandlerApi($normalizedUser, $ssoUserInfo);
+        } else {
+            // --- แบบเดิม: เรียกใช้ฟังก์ชัน findOrCreateUser จากไฟล์ user_handler.php ---
+            $userHandlerPath = __DIR__ . '/../user_handler.php';
+            if (!file_exists($userHandlerPath)) {
+                throw new \Exception("ไม่พบไฟล์ user_handler.php โปรดสร้างไฟล์นี้ตามเทมเพลต");
+            }
+            require_once $userHandlerPath;
+
+            if (!function_exists('findOrCreateUser')) {
+                throw new \Exception("ไม่พบฟังก์ชัน findOrCreateUser() ในไฟล์ user_handler.php");
+            }
+            $internalUser = findOrCreateUser($normalizedUser, $ssoUserInfo);
         }
-        $internalUser = findOrCreateUser($normalizedUser, $ssoUserInfo);
+        // -- v.2 --
 
         // 5. สร้าง Session
         $_SESSION['user_is_logged_in'] = true;
         $_SESSION['user_info'] = $internalUser;
 
         return $internalUser;
+    }
+
+    /**
+     * (เมธอดใหม่) เรียกไปยัง User Handler API Endpoint
+     *
+     * @param array $normalizedUser ข้อมูลผู้ใช้ที่แปลงแล้ว
+     * @param object $ssoUserInfo ข้อมูลดิบจาก SSO
+     * @return array ข้อมูลผู้ใช้จาก Web Application
+     * @throws \Exception
+     */
+    private function callUserHandlerApi(array $normalizedUser, object $ssoUserInfo): array
+    {
+        $endpointUrl = USER_HANDLER_ENDPOINT;
+
+        $payload = json_encode([
+            'normalizedUser' => $normalizedUser,
+            'ssoUserInfo' => $ssoUserInfo
+        ]);
+
+        $ch = curl_init($endpointUrl);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'Content-Length: ' . strlen($payload),
+            'X-API-SECRET: ' . (defined('API_SECRET_KEY') ? API_SECRET_KEY : '')
+        ]);
+
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        if (curl_errno($ch)) {
+            throw new \Exception('API Call Error: ' . curl_error($ch));
+        }
+        curl_close($ch);
+
+        if ($httpCode !== 200) {
+            throw new \Exception("API Endpoint returned HTTP status {$httpCode}. Response: {$response}");
+        }
+
+        $userData = json_decode($response, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new \Exception('ไม่สามารถถอดรหัส JSON ที่ได้รับจาก API Endpoint ได้');
+        }
+
+        return $userData;
     }
     
     /**
