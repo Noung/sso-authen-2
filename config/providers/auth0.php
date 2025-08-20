@@ -8,9 +8,9 @@
 require_once __DIR__ . '/../config.php';
 
 return [
-    'clientID'     => 'KNBxmKAw6XNS1Je0ep9xW8D7g7dZMDA8',
-    'clientSecret' => 'HxK2QUQ4bVAMTIyIlvRUq8T4D82Sht7-bAIaZODhbNna3k3dsZw5iYyLMCDEtUR9',
-    'providerURL'  => 'https://dev-ihvejgde0lo18on2.us.auth0.com',
+    'clientID'     => 'YOUR_CLIENT_ID_HERE',
+    'clientSecret' => 'YOUR_CLIENT_SECRET_HERE',
+    'providerURL'  => 'YOUR_PROVIDER_URL_HERE',
 
     // **สำคัญ:** path ต้องมี /public/ เพิ่มเข้ามาให้ตรงกับโครงสร้างใหม่
     'redirectUri'  => $absoluteRedirectUri . '/public/callback.php',
