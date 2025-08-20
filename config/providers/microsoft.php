@@ -10,7 +10,7 @@ require_once __DIR__ . '/../config.php';
 return [
     'clientID'     => 'YOUR_CLIENT_ID_HERE',
     'clientSecret' => 'YOUR_CLIENT_SECRET_HERE',
-    'providerURL'  => 'https://login.microsoftonline.com/common/v2.0',
+    'providerURL'  => 'https://login.microsoftonline.com/common/v2.0', // นี่คือ Issuer URL ของ Microsoft
 
     // **สำคัญ:** path ต้องมี /public/ เพิ่มเข้ามาให้ตรงกับโครงสร้างใหม่
     'redirectUri'  => $absoluteRedirectUri . '/public/callback.php',
