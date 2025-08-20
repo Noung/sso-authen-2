@@ -68,23 +68,18 @@
 
 ```mermaid
 sequenceDiagram
-    participant User (Browser)
-    participant WebApp (Your App)
-    participant SsoAuthen (Library)
-    participant OIDCProvider as OIDC Provider
-
-    User->>WebApp: 1. คลิกปุ่ม Login
-    WebApp->>User: 2. Redirect ไปยัง SsoAuthen
-    User->>SsoAuthen: 3. /login.php
-    SsoAuthen->>User: 4. Redirect ไปยัง OIDC Provider
-    User->>OIDCProvider: 5. ทำการยืนยันตัวตน
-    OIDCProvider->>User: 6. ส่งกลับมาที่ SsoAuthen พร้อม Authorization Code
-    User->>SsoAuthen: 7. /callback.php
-    SsoAuthen->>OIDCProvider: 8. แลก Code เป็น ID Token (Back-Channel)
-    OIDCProvider-->>SsoAuthen: 9. ส่ง ID Token กลับมา
-    SsoAuthen->>WebApp: 10. **เรียก API Endpoint ของ WebApp** (Server-to-Server)
-    WebApp-->>SsoAuthen: 11. **ส่งข้อมูลผู้ใช้ในระบบกลับมา (JSON)**
-    SsoAuthen->>User: 12. Redirect กลับไปที่ WebApp พร้อมสถานะล็อกอิน
+    User (Browser)->>WebApp (Your App): 1. คลิกปุ่ม Login
+    WebApp (Your App)->>User (Browser): 2. Redirect ไปยัง SsoAuthen
+    User (Browser)->>SsoAuthen (Library): 3. /login.php
+    SsoAuthen (Library)->>User (Browser): 4. Redirect ไปยัง OIDC Provider
+    User (Browser)->>OIDC Provider: 5. ทำการยืนยันตัวตน
+    OIDC Provider->>User (Browser): 6. ส่งกลับมาที่ SsoAuthen พร้อม Authorization Code
+    User (Browser)->>SsoAuthen (Library): 7. /callback.php
+    SsoAuthen (Library)->>OIDC Provider: 8. แลก Code เป็น ID Token (Back-Channel)
+    OIDC Provider-->>SsoAuthen (Library): 9. ส่ง ID Token กลับมา
+    SsoAuthen (Library)->>WebApp (Your App): 10. เรียก API Endpoint ของ WebApp (Server-to-Server)
+    WebApp (Your App)-->>SsoAuthen (Library): 11. ส่งข้อมูลผู้ใช้ในระบบกลับมา (JSON)
+    SsoAuthen (Library)->>User (Browser): 12. Redirect กลับไปที่ WebApp พร้อมสถานะล็อกอิน
 ```
 
 ---
